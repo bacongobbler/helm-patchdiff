@@ -1,36 +1,36 @@
 package main
 
 import (
-	"os"
-	"log"
-	"fmt"
 	"bytes"
-	"strings"
 	"encoding/json"
+	"fmt"
+	"log"
+	"os"
+	"strings"
 
+	jsonpatch "github.com/evanphx/json-patch"
+	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
-	apierrors "k8s.io/apimachinery/pkg/api/errors"
-	"k8s.io/client-go/discovery"
-	"k8s.io/cli-runtime/pkg/resource"
-	"k8s.io/apimachinery/pkg/runtime"
-	"k8s.io/apimachinery/pkg/types"
-	jsonpatch "github.com/evanphx/json-patch"
-	apiextv1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"
-	"k8s.io/apimachinery/pkg/util/strategicpatch"
-	"github.com/pkg/errors"
 	"helm.sh/helm/v3/pkg/action"
 	"helm.sh/helm/v3/pkg/chart"
 	"helm.sh/helm/v3/pkg/chart/loader"
 	"helm.sh/helm/v3/pkg/chartutil"
 	"helm.sh/helm/v3/pkg/cli"
 	"helm.sh/helm/v3/pkg/cli/values"
-	"helm.sh/helm/v3/pkg/kube"
 	"helm.sh/helm/v3/pkg/engine"
 	"helm.sh/helm/v3/pkg/getter"
+	"helm.sh/helm/v3/pkg/kube"
 	"helm.sh/helm/v3/pkg/release"
 	"helm.sh/helm/v3/pkg/releaseutil"
 	"helm.sh/helm/v3/pkg/storage/driver"
+	apiextv1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"
+	apierrors "k8s.io/apimachinery/pkg/api/errors"
+	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/types"
+	"k8s.io/apimachinery/pkg/util/strategicpatch"
+	"k8s.io/cli-runtime/pkg/resource"
+	"k8s.io/client-go/discovery"
 )
 
 var settings = cli.New()
@@ -40,14 +40,14 @@ func main() {
 	var rootCmd = &cobra.Command{
 		Use:   "patchdiff <NAME> <CHART> [options]",
 		Short: "Preview helm upgrade changes as a JSON patch",
-		Long: "Preview helm upgrade changes as a JSON patch",
-		Args: cobra.ExactArgs(2),
+		Long:  "Preview helm upgrade changes as a JSON patch",
+		Args:  cobra.ExactArgs(2),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			name := args[0]
 			if err := validateReleaseName(name); err != nil {
 				log.Fatal(err)
 			}
-			
+
 			chartPath := args[1]
 
 			vals, err := valueOpts.MergeValues(getter.All(settings))
@@ -59,7 +59,7 @@ func main() {
 			if err != nil {
 				log.Fatal(err)
 			}
-			
+
 			patchset, err := createPatchset(name, ch, vals)
 			if err != nil {
 				log.Fatal(err)
@@ -80,10 +80,10 @@ func main() {
 func createPatchset(name string, ch *chart.Chart, vals map[string]interface{}) (string, error) {
 	patches := []string{}
 
-    actionConfig := new(action.Configuration)
-    if err := actionConfig.Init(settings.RESTClientGetter(), settings.Namespace(), os.Getenv("HELM_DRIVER"), log.Printf); err != nil {
-        log.Fatalf("%+v", err)
-    }
+	actionConfig := new(action.Configuration)
+	if err := actionConfig.Init(settings.RESTClientGetter(), settings.Namespace(), os.Getenv("HELM_DRIVER"), log.Printf); err != nil {
+		log.Fatalf("%+v", err)
+	}
 
 	if err := actionConfig.KubeClient.IsReachable(); err != nil {
 		return "", err
@@ -248,7 +248,7 @@ func renderResources(c *action.Configuration, ch *chart.Chart, values chartutil.
 			return b, errors.Errorf("chart requires kubeVersion: %s which is incompatible with Kubernetes %s", ch.Metadata.KubeVersion, c.Capabilities.KubeVersion.String())
 		}
 	}
-	
+
 	rest, err := c.RESTClientGetter.ToRESTConfig()
 	if err != nil {
 		return b, err
