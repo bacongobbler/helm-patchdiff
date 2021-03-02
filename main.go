@@ -261,16 +261,18 @@ func renderResources(c *action.Configuration, ch *chart.Chart, values chartutil.
 	// Sort hooks, manifests, and partials. Only hooks and manifests are returned,
 	// as partials are not used after renderer.Render. Empty manifests are also
 	// removed here.
+	for k, _ := range files {
+		if strings.HasSuffix(k, "NOTES.txt") {
+			delete(files, k)
+		}
+	}
 	_, manifests, err := releaseutil.SortManifests(files, c.Capabilities.APIVersions, releaseutil.InstallOrder)
 	if err != nil {
 		return b, err
 	}
 
 	for _, m := range manifests {
-		// skip notes
-		if !strings.Contains(m.Name, "NOTES.txt") {
-			fmt.Fprintf(b, "---\n# Source: %s\n%s\n", m.Name, m.Content)
-		}
+		fmt.Fprintf(b, "---\n# Source: %s\n%s\n", m.Name, m.Content)
 	}
 
 	return b, nil
