@@ -2,6 +2,10 @@
 
 Generates a JSON patch diff based on the parameters that would be passed along to `helm upgrade`.
 
+# ARCHIVED
+
+This project was a proof of concept to generate the same patch diffs as Helm. I do not plan on maintaining this as an official Helm plugin.
+
 ## Usage
 
 ```console
